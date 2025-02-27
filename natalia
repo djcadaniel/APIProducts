@@ -1,0 +1,62 @@
+function main(workbook: ExcelScript.Workbook): { nombreHoja: string, datos: (string | number | boolean)[][] }[] {
+  const hojas = [
+    "INTERNO",
+    "EXTERNO",
+    "INST1",
+    "INST2",
+    "CORP"
+  ];
+ 
+  // Definir el tipo correcto para datosCopiados
+  let datosCopiados: { 
+    nombreHoja: string, 
+    datos: (string | number | boolean)[][] 
+  }[] = [];
+ 
+  // Iterar sobre cada hoja
+  hojas.forEach(hojaNombre => {
+    let hoja = workbook.getWorksheet(hojaNombre); 
+    if (!hoja) {
+      console.log(`La hoja ${hojaNombre} no existe en el archivo de origen.`);
+      return;
+    }
+ 
+    // Obtén todas las celdas usadas en la hoja de cálculo
+    let rango = hoja.getUsedRange();
+    let datos = rango.getValues();
+ 
+    // Agregar los datos al array de datosCopiados
+    datosCopiados.push({ nombreHoja: hojaNombre, datos: datos });
+  });
+ 
+  // Devolver los datos copiados como una lista
+  return datosCopiados;
+}
+
+
+Pegar requerimientos
+ 
+function main(workbook: ExcelScript.Workbook, datosCopiados: { nombreHoja: string, datos: string[][] }[]) {
+  // Iterar sobre cada objeto de datosCopiados
+  datosCopiados.forEach(item => {
+    // Selecciona la hoja de cálculo de destino utilizando el nombre dinámico
+    let hojaDestino = workbook.getWorksheet(item.nombreHoja);
+ 
+    // Verificar si la hoja de destino existe
+    if (!hojaDestino) {
+      console.log(`La hoja ${item.nombreHoja} no existe en el archivo de destino.`);
+      return;
+    }
+ 
+    // Obtener los datos para la hoja actual
+    let datos = item.datos;
+ 
+    // Determinar el tamaño del rango copiado
+    let numFilas = datos.length;
+    let numColumnas = datos[0].length;
+ 
+    // Pegar los datos copiados en el rango de destino del mismo tamaño
+    hojaDestino.getRangeByIndexes(0, 0, numFilas, numColumnas).setValues(datos);
+  });
+}
+ 
